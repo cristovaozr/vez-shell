@@ -30,7 +30,7 @@ static char last_line[MAX_LINE_SIZE];
 /** Stores current position of the line */
 static uint32_t pos = 0;
 
-static void process_line(char *line, const struct vez_shell_entry *cmd_list)
+static void process_line(char *line, const struct vez_shell_entry *cmd_list, uint32_t cmd_len)
 {
     char *saveptr, *cmd, *argv[MAX_ARG_SIZE];
     int argc;
@@ -50,7 +50,7 @@ static void process_line(char *line, const struct vez_shell_entry *cmd_list)
     }
 
     // Looks for a command in the command list
-    for (int i = 0; cmd_list[i].cmd; i++) {
+    for (int i = 0; i < cmd_len; i++) {
         if(strcmp(cmd, cmd_list[i].cmd) == 0) {
             ret = cmd_list[i].fp(argc, argv);
             if (ret) uprintf("Error executing command %s\r\n", cmd);
@@ -68,7 +68,7 @@ void vez_shell_greeter(const char *msg)
     uprintf("\r\n" SHELL_BANNER);
 }
 
-void vez_shell_iterate(const struct vez_shell_entry *cmd_list)
+void vez_shell_iterate(const struct vez_shell_entry *cmd_list, uint32_t cmd_len)
 {
     int c = ugetchar();
     if (c == -1) return;
@@ -86,7 +86,7 @@ void vez_shell_iterate(const struct vez_shell_entry *cmd_list)
             line[pos] = '\0'; // EOL
             // Saves last line
             if (pos > 0) strcpy(last_line, line);
-            process_line(line, cmd_list);
+            process_line(line, cmd_list, cmd_len);
             pos = 0;
             uprintf(SHELL_BANNER); // New line
             break;
